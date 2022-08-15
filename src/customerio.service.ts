@@ -27,10 +27,16 @@ interface ICustomerioService {
 export class CustomerioService implements ICustomerioService {
     private readonly logger: Logger;
 
-    private client: TrackClient;
+    private client: TrackClient | undefined;
 
     constructor(@Inject(CUSTOMERIO_OPTIONS) private _CustomerioOptions: CustomerioOptions) {
         this.logger = new Logger('CustomerioService');
+
+        if (!_CustomerioOptions.enabled) {
+            this.logger.warn(`Customer.io integration disabled`);
+            return;
+        }
+
         this.logger.log(`Options: ${JSON.stringify(this._CustomerioOptions)}`);
 
         this.client = new TrackClient(_CustomerioOptions.siteId, _CustomerioOptions.apiKey);
@@ -42,7 +48,7 @@ export class CustomerioService implements ICustomerioService {
      * @param update Update a user rather than creating a new user
      */
     async identify({ created, ...user }: IUser, update = false) {
-        await this.client.identify(`${update ? 'cio_' : ''}${user.id}`, {
+        await this.client?.identify(`${update ? 'cio_' : ''}${user.id}`, {
             ...user,
             created_at: created.getTime(),
         });
@@ -53,7 +59,7 @@ export class CustomerioService implements ICustomerioService {
      * @param user User or their ID
      */
     async destroy(user: string | IUser) {
-        await this.client.destroy(this.userID(user));
+        await this.client?.destroy(this.userID(user));
     }
 
     /**
@@ -62,7 +68,7 @@ export class CustomerioService implements ICustomerioService {
      * @param details Device details
      */
     async registerDevice(user: string | IUser, details: { id: string; platform: 'ios' | 'android' }) {
-        await this.client.addDevice(this.userID(user), details.id, details.platform);
+        await this.client?.addDevice(this.userID(user), details.id, details.platform);
     }
 
     private userID(user: string | IUser) {
