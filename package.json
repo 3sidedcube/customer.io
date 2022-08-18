@@ -1,6 +1,6 @@
 {
     "name": "@chelsea-apps/customerio",
-    "version": "0.0.2-alpha.2",
+    "version": "0.0.2",
     "description": "Customerio for Chelsea Apps NestJS packages",
     "main": "dist/index",
     "types": "dist/index",
